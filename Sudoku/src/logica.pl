@@ -27,6 +27,19 @@ TableroR=[[P11,P12,P13,P21,P22,P23,P31,P32,P33],
 		  [P47,P48,P49,P57,P58,P59,P67,P68,P69],
 		  [P71,P72,P73,P81,P82,P83,P91,P92,P93],
 		  [P74,P75,P76,P84,P85,P86,P94,P95,P96],
-		  [P77,P78,P79,P87,P88,P89,P97,P98,P99]]
-		  .
+		  [P77,P78,P79,P87,P88,P89,P97,P98,P99]].
 		  
+agregar(N,X,Y,Tablero):-armarFila(X,Tablero,Fila),armarColumna(Y,Tablero,Col),
+							armarCuadro(X,Y,Tablero,Cuadro).
+
+
+armarFila(X,Tablero,Fila):- Z is X*9,armarFilaAux(Z,9,Tablero,Fila).
+
+armarFilaAux(Z,0,Tablero,[A|Fila]):-posicion(Z,Tablero,A).
+armarFilaAux(Z,I,Tablero,Fila):-Pos is Z+I,posicion(Pos,Tablero,A),Aux is I-1,
+										armarFilaAux(Z,Aux,Tablero,Fila2),
+    									append(Fila2,[A],Fila).
+
+posicion(0,[A|_],A).
+posicion(N,[_|B],A):- Aux is N-1, posicion(Aux,B,A).
+ 
