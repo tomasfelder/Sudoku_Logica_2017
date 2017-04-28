@@ -29,6 +29,16 @@ TableroR=[[P11,P12,P13,P21,P22,P23,P31,P32,P33],
 		  [P74,P75,P76,P84,P85,P86,P94,P95,P96],
 		  [P77,P78,P79,P87,P88,P89,P97,P98,P99]].
 		  
+nroValido(1).
+nroValido(2).
+nroValido(3).
+nroValido(4).
+nroValido(5).
+nroValido(6).
+nroValido(7).
+nroValido(8).
+nroValido(9).
+
 agregar(N,X,Y,TableroF,TableroNuevo):-tableroProlog(TableroF,Columnas,Cuadros),Z is (((X-1) div 3)*3 + ((Y-1) div 3))+1
 							,jugadaValida(N,X,Y,Z,TableroF,Columnas,Cuadros),
     		agregarATablero(N,X,Y,TableroF,TableroNuevo).
@@ -48,3 +58,12 @@ agregarATablero(N,X,Y,TableroF,TableroN):-obtenerLista(X,TableroF,Fila),reemplaz
 
 reemplazar(Nuevo,1,[_|L],[Nuevo|L]).
 reemplazar(Nuevo,N,[X|L],[X|LNueva]):- Aux is N-1, reemplazar(Nuevo,Aux,L,LNueva).
+
+comprobar(TableroF):-tableroProlog(TableroF,Columnas,Cuadros),
+    		,nroValido(X),nroValido(Y),esCero(TableroF,X,Y),
+    		nroValido(N),
+    		agregar(N,X,Y,TableroF,TableroNuevo),comprobar(TableroNuevo).
+
+comprobar(TableroF):-tableroProlog(TableroF,Columnas,Cuadros),
+    		nroValido(N),nroValido(X),nroValido(Y),
+    		agregar(N,X,Y,TableroF,TableroNuevo),comprobar(TableroNuevo).
