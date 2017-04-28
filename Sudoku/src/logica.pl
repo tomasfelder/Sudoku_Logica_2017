@@ -1,4 +1,4 @@
-
+tableroProlog(TableroF,TableroC,TableroR):-
 TableroF=[[P11,P12,P13,P14,P15,P16,P17,P18,P19],
 		  [P21,P22,P23,P24,P25,P26,P27,P28,P29],
 		  [P31,P32,P33,P34,P35,P36,P37,P38,P39],
@@ -29,17 +29,22 @@ TableroR=[[P11,P12,P13,P21,P22,P23,P31,P32,P33],
 		  [P74,P75,P76,P84,P85,P86,P94,P95,P96],
 		  [P77,P78,P79,P87,P88,P89,P97,P98,P99]].
 		  
-agregar(N,X,Y,Tablero):-armarFila(X,Tablero,Fila),armarColumna(Y,Tablero,Col),
-							armarCuadro(X,Y,Tablero,Cuadro).
+agregar(N,X,Y,TableroF,TableroNuevo):-tableroProlog(TableroF,Columnas,Cuadros),Z is (((X-1) div 3)*3 + ((Y-1) div 3))+1
+							,jugadaValida(N,X,Y,Z,TableroF,Columnas,Cuadros),
+    		agregarATablero(N,X,Y,TableroF,TableroNuevo).
+jugadaValida(N,X,Y,Z,Filas,Columnas,Cuadros):-no_perteneceAMatriz(N,X,Filas),no_perteneceAMatriz(N,Z,Cuadros),
+							no_perteneceAMatriz(N,Y,Columnas).
 
+no_perteneceAMatriz(N,NroLista,TableroF):-obtenerLista(NroLista,TableroF,L),no_pertenece(N,L).
 
-armarFila(X,Tablero,Fila):- Z is X*9,armarFilaAux(Z,9,Tablero,Fila).
+obtenerLista(1,[A|_],A).
+obtenerLista(N,[_|B],A):- Aux is N-1, obtenerLista(Aux,B,A).
 
-armarFilaAux(Z,0,Tablero,[A|Fila]):-posicion(Z,Tablero,A).
-armarFilaAux(Z,I,Tablero,Fila):-Pos is Z+I,posicion(Pos,Tablero,A),Aux is I-1,
-										armarFilaAux(Z,Aux,Tablero,Fila2),
-    									append(Fila2,[A],Fila).
+no_pertenece(_,[]).
+no_pertenece(N,[X|L]):-N\=X,no_pertenece(N,L).
 
-posicion(0,[A|_],A).
-posicion(N,[_|B],A):- Aux is N-1, posicion(Aux,B,A).
- 
+agregarATablero(N,X,Y,TableroF,TableroN):-obtenerLista(X,TableroF,Fila),reemplazar(N,Y,Fila,FilaNueva),
+    										reemplazar(FilaNueva,X,TableroF,TableroN).
+
+reemplazar(Nuevo,1,[_|L],[Nuevo|L]).
+reemplazar(Nuevo,N,[X|L],[X|LNueva]):- Aux is N-1, reemplazar(Nuevo,Aux,L,LNueva).
