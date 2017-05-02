@@ -47,28 +47,30 @@ agregar(N,X,Y,TableroF,TableroNuevo):-tableroProlog(TableroF,Columnas,Cuadros),
 jugadaValida(N,X,Y,Z,Filas,Columnas,Cuadros):-no_perteneceAMatriz(N,X,Filas),no_perteneceAMatriz(N,Z,Cuadros),
 							no_perteneceAMatriz(N,Y,Columnas).
 
-no_perteneceAMatriz(N,NroLista,TableroF):-obtenerLista(NroLista,TableroF,L),no_pertenece(N,L).
+no_perteneceAMatriz(N,NroLista,TableroF):-obtenerElemento(NroLista,TableroF,L),no_pertenece(N,L).
 
-obtenerLista(1,[A|_],A).
-obtenerLista(N,[_|B],A):- Aux is N-1, obtenerLista(Aux,B,A).
+obtenerElemento(1,[A|_],A).
+obtenerElemento(N,[_|B],A):- Aux is N-1, obtenerElemento(Aux,B,A).
 
 no_pertenece(_,[]).
 no_pertenece(N,[X|L]):-N\=X,no_pertenece(N,L).
 
-agregarATablero(N,X,Y,TableroF,TableroN):-obtenerLista(X,TableroF,Fila),reemplazar(N,Y,Fila,FilaNueva),
+agregarATablero(N,X,Y,TableroF,TableroN):-obtenerElemento(X,TableroF,Fila),reemplazar(N,Y,Fila,FilaNueva),
     										reemplazar(FilaNueva,X,TableroF,TableroN).
 
 reemplazar(Nuevo,1,[_|L],[Nuevo|L]).
 reemplazar(Nuevo,N,[X|L],[X|LNueva]):- Aux is N-1, reemplazar(Nuevo,Aux,L,LNueva).
 
-comp(TableroF,TableroOut):-agregarNumero(TableroF,TableroNuevo),
+comprobar(Tablero):-resolver(Tablero,_).
+
+resolver(TableroF,TableroOut):-agregarNumero(TableroF,TableroNuevo),
     			tableroProlog(TableroNuevo,Columnas,Cuadros),
     			todos_diferentes_matriz(TableroNuevo),
     			todos_diferentes_matriz(Columnas),
     			todos_diferentes_matriz(Cuadros),
-				comp(TableroNuevo,TableroOut).
+				resolver(TableroNuevo,TableroOut).
 
-comp(TableroF,TableroOut):-tableroProlog(TableroF,Columnas,Cuadros),
+resolver(TableroF,TableroOut):-tableroProlog(TableroF,Columnas,Cuadros),
     			final(TableroF),final(Columnas),final(Cuadros),copiarSalida(TableroF,TableroOut).
 
 copiarSalida([],[]).
