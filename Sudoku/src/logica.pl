@@ -38,14 +38,12 @@ nroValido(6).
 nroValido(7).
 nroValido(8).
 nroValido(9).
-coord(X,Y):-nroValido(X),nroValido(Y).
-listaNumeros([1,2,3,4,5,6,7,8,9]).
 
-coordenadas( [[1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [1, 8], [1, 9], [2, 1], [2, 2], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7], [2, 8], [2, 9], [3, 1], [3, 2], [3, 3], [3, 4], [3, 5], [3, 6], [3, 7], [3, 8], [3, 9], [4, 1], [4, 2], [4, 3], [4, 4], [4, 5], [4, 6], [4, 7], [4, 8], [4, 9], [5, 1], [5, 2], [5, 3], [5, 4], [5, 5], [5, 6], [5, 7], [5, 8], [5, 9], [6, 1], [6, 2], [6, 3], [6, 4], [6, 5], [6, 6], [6, 7], [6, 8], [6, 9], [7, 1], [7, 2], [7, 3], [7, 4], [7, 5], [7, 6], [7, 7], [7, 8], [7, 9], [8, 1], [8, 2], [8, 3], [8, 4], [8, 5], [8, 6], [8, 7], [8, 8], [8, 9], [9, 1], [9, 2], [9, 3], [9, 4], [9, 5], [9, 6], [9, 7], [9, 8], [9, 9]]).
-
-agregar(N,X,Y,TableroF,TableroNuevo):-tableroProlog(TableroF,Columnas,Cuadros),Z is (((X-1) div 3)*3 + ((Y-1) div 3))+1
-							,jugadaValida(N,X,Y,Z,TableroF,Columnas,Cuadros),
-    		agregarATablero(N,X,Y,TableroF,TableroNuevo).
+agregar(N,X,Y,TableroF,TableroNuevo):-tableroProlog(TableroF,Columnas,Cuadros),
+							nroValido(X),nroValido(Y),Z is (((X-1) div 3)*3 + ((Y-1) div 3))+1,
+    						nroValido(N),
+    						jugadaValida(N,X,Y,Z,TableroF,Columnas,Cuadros),
+    						agregarATablero(N,X,Y,TableroF,TableroNuevo).
 jugadaValida(N,X,Y,Z,Filas,Columnas,Cuadros):-no_perteneceAMatriz(N,X,Filas),no_perteneceAMatriz(N,Z,Cuadros),
 							no_perteneceAMatriz(N,Y,Columnas).
 
@@ -63,20 +61,39 @@ agregarATablero(N,X,Y,TableroF,TableroN):-obtenerLista(X,TableroF,Fila),reemplaz
 reemplazar(Nuevo,1,[_|L],[Nuevo|L]).
 reemplazar(Nuevo,N,[X|L],[X|LNueva]):- Aux is N-1, reemplazar(Nuevo,Aux,L,LNueva).
 
-comprobar(TableroF):-coordenadas(C),comprobar_aux(TableroF,C).
+comp(TableroF,TableroOut):-agregarNumero(TableroF,TableroNuevo),
+    			tableroProlog(TableroNuevo,Columnas,Cuadros),
+    			todos_diferentes_matriz(TableroNuevo),
+    			todos_diferentes_matriz(Columnas),
+    			todos_diferentes_matriz(Cuadros),
+				comp(TableroNuevo,TableroOut).
 
-comprobar_aux(_,[]).
-comprobar_aux(TableroF,[[X,Y]|C]):-esCero(TableroF,X,Y),nroValido(N),
-    				agregar(N,X,Y,TableroF,TableroNuevo)
-    						,comprobar_aux(TableroNuevo,C).
-comprobar_aux(TableroF,[[_,_]|C]):-comprobar_aux(TableroF,C).
+comp(TableroF,TableroOut):-tableroProlog(TableroF,Columnas,Cuadros),
+    			final(TableroF),final(Columnas),final(Cuadros),copiarSalida(TableroF,TableroOut).
 
-comprobar2(TableroF):-not(fin_sudoku(TableroF)),coord(X,Y),
-                          esCero(TableroF,X,Y),
-    		nroValido(N),agregar(N,X,Y,TableroF,TableroNuevo),
-    				comprobar2(TableroNuevo).
+copiarSalida([],[]).
+copiarSalida([X|Xs],[X|Ys]):-copiarSalida(Xs,Ys).
 
-esCero(TableroF,X,Y):-obtenerLista(X,TableroF,L),obtenerLista(Y,L,E),E=0.
+agregarNumero([Fila|Tablero],[Nueva|Tablero]):-buscarCero(Fila,Nueva).
+agregarNumero([Fila|Tablero],[Fila|T]):-no_pertenece(0,Fila),
+    							agregarNumero(Tablero,T).
 
-fin_sudoku([]).
-fin_sudoku(Fila|Resto):-no_pertenece(0,Fila),fin_sudoku(Resto).
+buscarCero([0|Xs],[N|Xs]):-nroValido(N).
+buscarCero([X|Xs],[X|Nueva]):-X\=0,buscarCero(Xs,Nueva).
+
+todos_diferentes_matriz([]).
+todos_diferentes_matriz([Lista|Resto]):-todos_diferentes(Lista),
+    				todos_diferentes_matriz(Resto).
+
+todos_diferentes([]).
+todos_diferentes([_,[]]).
+todos_diferentes([X|L]):-X\=0,no_pertenece(X,L),todos_diferentes(L).
+todos_diferentes([X|L]):-X=0,todos_diferentes(L).
+
+final([]).
+final([Lista|Resto]):-todos_diferentes_2(Lista),
+    				final(Resto).
+
+todos_diferentes_2([]).
+todos_diferentes_2([X,[]]):-X\=0.
+todos_diferentes_2([X|L]):-X\=0,no_pertenece(X,L),todos_diferentes_2(L).
