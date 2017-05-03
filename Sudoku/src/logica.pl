@@ -63,10 +63,11 @@ reemplazar(Nuevo,N,[X|L],[X|LNueva]):- Aux is N-1, reemplazar(Nuevo,Aux,L,LNueva
 
 comprobar(Tablero):-resolver(Tablero,_).
 
-resolver(TableroF,TableroOut):-agregarNumero(TableroF,TableroNuevo),
-    			tableroProlog(TableroNuevo,Columnas,Cuadros),
-    			todos_diferentes_matriz(TableroNuevo),
-    			todos_diferentes_matriz(Columnas),
+resolver(TableroF,TableroOut):-tableroProlog(TableroF,TableroC,_),
+    			agregarNumero(TableroF,TableroNuevo,TableroC),
+    			tableroProlog(TableroNuevo,_,Cuadros),
+    			%todos_diferentes_matriz(TableroNuevo),
+    			%todos_diferentes_matriz(Columnas),
     			todos_diferentes_matriz(Cuadros),
 				resolver(TableroNuevo,TableroOut).
 
@@ -76,12 +77,12 @@ resolver(TableroF,TableroOut):-tableroProlog(TableroF,Columnas,Cuadros),
 copiarSalida([],[]).
 copiarSalida([X|Xs],[X|Ys]):-copiarSalida(Xs,Ys).
 
-agregarNumero([Fila|Tablero],[Nueva|Tablero]):-buscarCero(Fila,Nueva).
-agregarNumero([Fila|Tablero],[Fila|T]):-no_pertenece(0,Fila),
-    							agregarNumero(Tablero,T).
+agregarNumero([Fila|Tablero],[Nueva|Tablero],TableroC):-buscarCero(Fila,Nueva,Fila,TableroC).
+agregarNumero([Fila|Tablero],[Fila|T],TableroC):-no_pertenece(0,Fila),
+    							agregarNumero(Tablero,T,TableroC).
 
-buscarCero([0|Xs],[N|Xs]):-nroValido(N).
-buscarCero([X|Xs],[X|Nueva]):-X\=0,buscarCero(Xs,Nueva).
+buscarCero([0|Xs],[N|Xs],Fila,[Col|_]):-nroValido(N),no_pertenece(N,Fila),no_pertenece(N,Col).
+buscarCero([X|Xs],[X|Nueva],Fila,[_|TableroC]):-X\=0,buscarCero(Xs,Nueva,Fila,TableroC).
 
 todos_diferentes_matriz([]).
 todos_diferentes_matriz([Lista|Resto]):-todos_diferentes(Lista),
