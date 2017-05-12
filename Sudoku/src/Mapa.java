@@ -20,9 +20,14 @@ public class Mapa {
 			 }
 			if(encontre){
 				for(int i=0;i<TAMANO;i++){
-					for(int j=0;i<TAMANO;j++){
-						
+					int nroEnFila=0;
+					for(int j=0;j<linea.length();j++){
+						if(linea.charAt(j)!=','){
+							matriz[i][nroEnFila]=linea.charAt(j);
+							nroEnFila++;
+						}
 					}
+					linea=br.readLine();
 				}
 			}
 		}catch (IOException e){
@@ -36,4 +41,17 @@ public class Mapa {
 			}
 		}
 	}
+	
+	public Mapa() {
+		matriz=new char[TAMANO][TAMANO];
+	}
+
+	public void setElemento(int x,int y,char c){
+		matriz[x][y]=c;
+	}
+	
+	public char	getElemento(int x, int y){
+		return matriz[x][y];
+	}
+	
 }

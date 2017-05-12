@@ -15,10 +15,13 @@ import org.jpl7.Term;
 
 import javax.swing.border.LineBorder;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import javax.swing.JButton;
 
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
@@ -27,6 +30,11 @@ public class GUI {
 
 	private JFrame frame;
 	private JTextField[][] casillas;
+	private JButton btnIniciarPartida,btnCrearTablero,btnComprobar,btnResolver,btnCargarTablero;
+	private Mapa tableroInicial;
+	private JButton btnReiniciarTablero;
+	private JButton btnNuevaPartida;
+	private static final Color VERDE_CLARO=new Color(173,251,140);
 
 	/**
 	 * Launch the application.
@@ -68,19 +76,34 @@ public class GUI {
 		frame.getContentPane().add(panel);
 		panel.setLayout(new GridLayout(3, 3, 0, 0));
 		
-		JButton btnIniciarPartida = new JButton("Iniciar Partida");
+		btnIniciarPartida = new JButton("Iniciar Partida");
+		btnIniciarPartida.setEnabled(false);
 		btnIniciarPartida.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				if(tableroInicial==null)
+					tableroInicial=new Mapa();
 				for(int i=0;i<9;i++)
-					for(int j=0;j<9;j++)
+					for(int j=0;j<9;j++){
 						if(!casillas[i][j].getText().equals("")){
 							int num=Integer.parseInt(casillas[i][j].getText());
 							if(num>0&&num<10){
 								casillas[i][j].setFont(new Font("Tahoma", Font.BOLD,12));
-								casillas[i][j].setEditable(false);
+								casillas[i][j].setEnabled(false);
+								tableroInicial.setElemento(i, j, casillas[i][j].getText().charAt(0));
 							}
 						}
+						else{
+							casillas[i][j].setEnabled(true);
+							tableroInicial.setElemento(i, j, '0');
+						}
+					}
+				
 			btnIniciarPartida.setEnabled(false);
+			btnCrearTablero.setEnabled(false);
+			btnCargarTablero.setEnabled(false);
+			btnResolver.setEnabled(true);
+			btnReiniciarTablero.setEnabled(true);
+			btnNuevaPartida.setEnabled(true);
 			}
 		});
 		
@@ -97,6 +120,7 @@ public class GUI {
 			for(int j=0;j<9;j++){
 				casillas[i][j]=new JTextField();
 				casillas[i][j].setDocument(new JTextFieldLimit(1));
+				casillas[i][j].setFocusable(true);
 				casillas[i][j].addKeyListener(new KeyAdapter() {
 					   public void keyTyped(KeyEvent e) {
 					      char c = e.getKeyChar();
@@ -130,32 +154,77 @@ public class GUI {
 							  e.consume();
 						  }
 					   }
-					 
-					   
-					   
 				});
 				
 				casillas[i][j].setEnabled(false);
 				casillas[i][j].setBorder(new LineBorder(new Color(0, 0, 0), 1));
 				casillas[i][j].setHorizontalAlignment(SwingConstants.CENTER);
+				casillas[i][j].addFocusListener(new FocusListener() {
+
+		            @Override
+		            public void focusGained(FocusEvent e) {
+		            	boolean encontre=false;
+		            	int x=0;
+		            	int y=0;
+		            	for(int i=0;i<9&&!encontre;i++)
+							for(int j=0;j<9&&!encontre;j++){
+								encontre=casillas[i][j].equals(e.getSource());
+								x=i;
+								y=j;
+							}
+		            	for(int i=0;i<9;i++){
+		            		casillas[x][i].setBackground(VERDE_CLARO);
+		            		casillas[i][y].setBackground(VERDE_CLARO);
+		            	}
+		            	for(Component t:cuadros[(x / 3)*3 + (y / 3)].getComponents())
+		            		t.setBackground(VERDE_CLARO);
+		                casillas[x][y].setBackground(Color.GREEN);
+		                
+		            }
+
+		            @Override
+		            public void focusLost(FocusEvent e) {
+		            	boolean encontre=false;
+		            	int x=0;
+		            	int y=0;
+		            	for(int i=0;i<9&&!encontre;i++)
+							for(int j=0;j<9&&!encontre;j++){
+								encontre=casillas[i][j].equals(e.getSource());
+								x=i;
+								y=j;
+							}
+		            	for(int i=0;i<9;i++){
+		            		casillas[x][i].setBackground(Color.WHITE);
+		            		casillas[i][y].setBackground(Color.WHITE);
+		            	}
+		            	for(Component t:cuadros[(x / 3)*3 + (y / 3)].getComponents())
+		            		t.setBackground(Color.WHITE);
+		                casillas[x][y].setBackground(Color.WHITE);
+		            }
+		        });
 				cuadros[(i / 3)*3 + (j / 3)].add(casillas[i][j]);
 			}
 		
-		btnIniciarPartida.setBounds(355, 51, 113, 23);
+		btnIniciarPartida.setBounds(355, 19, 113, 23);
 		frame.getContentPane().add(btnIniciarPartida);
 		
-		JButton button = new JButton("Crear Tablero");
-		button.addActionListener(new ActionListener() {
+		btnCrearTablero = new JButton("Crear Tablero");
+		btnCrearTablero.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				for(int i=0;i<9;i++)
 					for(int j=0;j<9;j++)
 						casillas[i][j].setEnabled(true);
+				btnIniciarPartida.setEnabled(true);
+				btnCrearTablero.setEnabled(false);
+				btnCargarTablero.setEnabled(false);
+				btnComprobar.setEnabled(true);
 			}
 		});
-		button.setBounds(355, 125, 113, 23);
-		frame.getContentPane().add(button);
+		btnCrearTablero.setBounds(355, 81, 113, 23);
+		frame.getContentPane().add(btnCrearTablero);
 		
-		JButton btnComprobar = new JButton("Comprobar");
+		btnComprobar = new JButton("Comprobar");
+		btnComprobar.setEnabled(false);
 		btnComprobar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String tablero=armarTablero();
@@ -167,10 +236,11 @@ public class GUI {
 					  JOptionPane.showMessageDialog(null, "Vas mal!");
 			}
 		});
-		btnComprobar.setBounds(353, 199, 117, 29);
+		btnComprobar.setBounds(22, 305, 117, 23);
 		frame.getContentPane().add(btnComprobar);
 		
-		JButton btnResolver = new JButton("Resolver");
+		btnResolver = new JButton("Resolver");
+		btnResolver.setEnabled(false);
 		btnResolver.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String tablero=armarTablero();
@@ -192,22 +262,74 @@ public class GUI {
 					  JOptionPane.showMessageDialog(null, "Vas mal!");
 			}
 		});
-		btnResolver.setBounds(353, 279, 117, 29);
+		btnResolver.setBounds(175, 305, 117, 23);
 		frame.getContentPane().add(btnResolver);
 		
-		JButton btnCargarTablero = new JButton("Cargar Tablero");
+		btnCargarTablero = new JButton("Cargar Tablero");
 		btnCargarTablero.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String dificultad = (String) JOptionPane.showInputDialog(null,"Seleccione Una Dificultad",
 						   "Carga de Tablero", JOptionPane.QUESTION_MESSAGE, null,
 						  new String[] { "Seleccione","Facil", "Intermedio", "Dificil" },"Seleccione");
+				tableroInicial = new Mapa(dificultad);
 				if(dificultad!="Seleccione"){
-					Mapa m = new Mapa(dificultad);
+					for(int i=0;i<9;i++)
+						for(int j=0;j<9;j++){
+							String num = ""+tableroInicial.getElemento(i, j);
+							if(!num.equals("0")){
+								casillas[i][j].setText(num);
+								casillas[i][j].setEnabled(false);
+							}
+						}
 				}
+				btnIniciarPartida.setEnabled(true);
+				btnCrearTablero.setEnabled(false);
+				btnCargarTablero.setEnabled(false);
+				btnComprobar.setEnabled(true);
 			}
 		});
-		btnCargarTablero.setBounds(351, 160, 117, 29);
+		btnCargarTablero.setBounds(353, 143, 117, 23);
 		frame.getContentPane().add(btnCargarTablero);
+		
+		btnReiniciarTablero = new JButton("Reiniciar Tablero");
+		btnReiniciarTablero.setEnabled(false);
+		btnReiniciarTablero.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for(int i=0;i<9;i++)
+					for(int j=0;j<9;j++){
+						String num = ""+tableroInicial.getElemento(i, j);
+						if(!num.equals("0")){
+							casillas[i][j].setText(num);
+							casillas[i][j].setEnabled(false);
+						}
+						else
+							casillas[i][j].setText("");
+					}
+			}
+		});
+		btnReiniciarTablero.setBounds(350, 205, 130, 29);
+		frame.getContentPane().add(btnReiniciarTablero);
+		
+		btnNuevaPartida = new JButton("Nueva Partida");
+		btnNuevaPartida.setEnabled(false);
+		btnNuevaPartida.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for(int i=0;i<9;i++)
+					for(int j=0;j<9;j++){
+						casillas[i][j].setText("");
+						casillas[i][j].setEnabled(false);
+					}
+				btnIniciarPartida.setEnabled(false);
+				btnCrearTablero.setEnabled(true);
+				btnCargarTablero.setEnabled(true);
+				btnNuevaPartida.setEnabled(false);
+				btnComprobar.setEnabled(false);
+				btnResolver.setEnabled(false);
+				btnReiniciarTablero.setEnabled(false);
+			}
+		});
+		btnNuevaPartida.setBounds(351, 273, 117, 29);
+		frame.getContentPane().add(btnNuevaPartida);
 		
 	}
 	
