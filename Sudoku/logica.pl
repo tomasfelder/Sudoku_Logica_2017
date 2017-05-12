@@ -44,6 +44,10 @@ agregar(N,X,Y,TableroF,TableroNuevo):-tableroProlog(TableroF,Columnas,Cuadros),
     						nroValido(N),
     						jugadaValida(N,X,Y,Z,TableroF,Columnas,Cuadros),
     						agregarATablero(N,X,Y,TableroF,TableroNuevo).
+    						
+borrarJugada(N,X,Y,TableroF,TableroNuevo):-N=0,nroValido(X),nroValido(Y),
+    								agregarATablero(N,X,Y,TableroF,TableroNuevo).    	
+    										
 jugadaValida(N,X,Y,Z,Filas,Columnas,Cuadros):-no_perteneceAMatriz(N,X,Filas),no_perteneceAMatriz(N,Z,Cuadros),
 							no_perteneceAMatriz(N,Y,Columnas).
 

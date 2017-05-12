@@ -11,6 +11,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
 import org.jpl7.Query;
+import org.jpl7.Term;
 
 import javax.swing.border.LineBorder;
 import java.awt.Color;
@@ -26,7 +27,6 @@ public class GUI {
 
 	private JFrame frame;
 	private JTextField[][] casillas;
-	private String tablero;
 
 	/**
 	 * Launch the application.
@@ -100,7 +100,7 @@ public class GUI {
 				casillas[i][j].addKeyListener(new KeyAdapter() {
 					   public void keyTyped(KeyEvent e) {
 					      char c = e.getKeyChar();
-					      if ( ((c < '0') || (c > '9')) && (c != KeyEvent.VK_BACK_SPACE)) {
+					      if ( ((c < '1') || (c > '9')) && (c != KeyEvent.VK_BACK_SPACE)) {
 					         e.consume();  // ignore event
 					      }
 					      int x=0;
@@ -112,37 +112,23 @@ public class GUI {
 									x=i;
 									y=j;
 								}
-						  tablero="[";
-						  
-						  for(int i=0;i<9;i++){
-							  tablero+="[";
-							  for(int j=0;j<9;j++){
-									if (!casillas[i][j].getText().equals("")){
-										tablero+=casillas[i][j].getText();
-										
-									}else 
-										tablero+=0;
-									
-									if (j!=8)
-										tablero+=",";
-								}
-								tablero+="]";
-								if (i!=8)
-									tablero+=",";
-						  }
-						  tablero+="]";
-						  
+						  String tablero = armarTablero();
 						  
 						  x++; y++;
-						  String agregar="agregar("+c+","+x+","+y+","+tablero+",X)";
-						  Query q2=new Query(agregar);
-						  boolean agrego=q2.hasSolution();
-						  if (!agrego){
+						  String jugada;
+						  if(c==KeyEvent.VK_BACK_SPACE){
+					    	  c='0';
+					    	  jugada="borrarJugada("+c+","+x+","+y+","+tablero+",X)";
+						  }
+						  else
+							  jugada="agregar("+c+","+x+","+y+","+tablero+",X)";
+						  Query q2=new Query(jugada);
+						  boolean exito=q2.hasSolution();
+						  if (!exito){
 							  
 							  JOptionPane.showMessageDialog(null, "Numero incorrecto.");
-							  casillas[x-1][y-1].setText(null);
+							  e.consume();
 						  }
-						
 					   }
 					 
 					   
@@ -155,7 +141,7 @@ public class GUI {
 				cuadros[(i / 3)*3 + (j / 3)].add(casillas[i][j]);
 			}
 		
-		btnIniciarPartida.setBounds(355, 23, 113, 23);
+		btnIniciarPartida.setBounds(355, 51, 113, 23);
 		frame.getContentPane().add(btnIniciarPartida);
 		
 		JButton button = new JButton("Crear Tablero");
@@ -166,11 +152,89 @@ public class GUI {
 						casillas[i][j].setEnabled(true);
 			}
 		});
-		button.setBounds(357, 78, 113, 23);
+		button.setBounds(355, 125, 113, 23);
 		frame.getContentPane().add(button);
 		
+		JButton btnComprobar = new JButton("Comprobar");
+		btnComprobar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String tablero=armarTablero();
+				Query q=new Query("comprobar("+tablero+")");
+				  boolean exito=q.hasSolution();
+				  if (exito)
+					  JOptionPane.showMessageDialog(null, "Vas bien!");
+				  else
+					  JOptionPane.showMessageDialog(null, "Vas mal!");
+			}
+		});
+		btnComprobar.setBounds(353, 199, 117, 29);
+		frame.getContentPane().add(btnComprobar);
+		
+		JButton btnResolver = new JButton("Resolver");
+		btnResolver.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String tablero=armarTablero();
+				Query q=new Query("resolver("+tablero+",X)");
+				boolean exito=q.hasSolution();
+				if (exito){
+					Term nuevoTablero=q.oneSolution().get("X");
+					Term[] t=nuevoTablero.toTermArray();
+					for(int i=0;i<t.length;i++){
+						Term[] fila=t[i].toTermArray();
+						for(int j=0;j<fila.length;j++){
+							String num = fila[j].toString();
+							casillas[i][j].setText(num);
+							casillas[i][j].setEnabled(false);
+						}
+					}
+				}
+				else
+					  JOptionPane.showMessageDialog(null, "Vas mal!");
+			}
+		});
+		btnResolver.setBounds(353, 279, 117, 29);
+		frame.getContentPane().add(btnResolver);
+		
+		JButton btnCargarTablero = new JButton("Cargar Tablero");
+		btnCargarTablero.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String dificultad = (String) JOptionPane.showInputDialog(null,"Seleccione Una Dificultad",
+						   "Carga de Tablero", JOptionPane.QUESTION_MESSAGE, null,
+						  new String[] { "Seleccione","Facil", "Intermedio", "Dificil" },"Seleccione");
+				if(dificultad!="Seleccione"){
+					Mapa m = new Mapa(dificultad);
+				}
+			}
+		});
+		btnCargarTablero.setBounds(351, 160, 117, 29);
+		frame.getContentPane().add(btnCargarTablero);
+		
+	}
+	
+	private String armarTablero(){
+		String tablero="[";
+		  
+		  for(int i=0;i<9;i++){
+			  tablero+="[";
+			  for(int j=0;j<9;j++){
+					if (!casillas[i][j].getText().equals("")){
+						tablero+=casillas[i][j].getText();
+						
+					}else 
+						tablero+=0;
+					
+					if (j!=8)
+						tablero+=",";
+				}
+				tablero+="]";
+				if (i!=8)
+					tablero+=",";
+		  }
+		  tablero+="]";
+		  return tablero;
 	}
 }
+
 
 class JTextFieldLimit extends PlainDocument {
 	  private int limit;
