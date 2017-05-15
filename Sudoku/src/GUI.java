@@ -40,7 +40,7 @@ public class GUI {
 	private static final Color VERDE_CLARO=new Color(173,251,140);
 
 	/**
-	 * Launch the application.
+	 * Launch the application. Main
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
