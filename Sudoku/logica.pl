@@ -91,4 +91,4 @@ final([Lista|Resto]):-todos_diferentes(Lista),
 
 todos_diferentes([]).
 todos_diferentes([X,[]]):-X\=0.
-todos_diferentes([X|L]):-X\=0,no_pertenece(X,L),todos_diferentes_2(L).
+todos_diferentes([X|L]):-X\=0,no_pertenece(X,L),todos_diferentes(L).
