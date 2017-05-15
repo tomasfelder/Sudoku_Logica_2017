@@ -428,6 +428,7 @@ public class GUI {
 }
 
 
+@SuppressWarnings("serial")
 class JTextFieldLimit extends PlainDocument {
 	  private int limit;
 	  JTextFieldLimit(int limit) {
