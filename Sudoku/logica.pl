@@ -70,13 +70,12 @@ comprobar(Tablero):-resolver(Tablero,_).
 resolver(TableroF,TableroOut):-tableroProlog(TableroF,TableroC,_),
     			agregarNumero(TableroF,TableroNuevo,TableroC),
     			tableroProlog(TableroNuevo,_,Cuadros),
-    			%todos_diferentes_matriz(TableroNuevo),
-    			%todos_diferentes_matriz(Columnas),
     			todos_diferentes_matriz(Cuadros),
 				resolver(TableroNuevo,TableroOut).
 
-resolver(TableroF,TableroOut):-tableroProlog(TableroF,Columnas,Cuadros),
-    			final(TableroF),final(Columnas),final(Cuadros),copiarSalida(TableroF,TableroOut).
+resolver(TableroF,TableroOut):-resuelto(TableroF),copiarSalida(TableroF,TableroOut).
+
+resuelto(TableroF):-tableroProlog(TableroF,Columnas,Cuadros),final(TableroF),final(Columnas),final(Cuadros).
 
 copiarSalida([],[]).
 copiarSalida([X|Xs],[X|Ys]):-copiarSalida(Xs,Ys).

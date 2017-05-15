@@ -24,7 +24,9 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Arrays;
 import java.awt.event.ActionEvent;
+import javax.swing.JLabel;
 
 public class GUI {
 
@@ -34,6 +36,8 @@ public class GUI {
 	private Mapa tableroInicial;
 	private JButton btnReiniciarTablero;
 	private JButton btnNuevaPartida;
+	private JLabel lblTiempo;
+	private Tiempo tiempo;
 	private static final Color VERDE_CLARO=new Color(173,251,140);
 
 	/**
@@ -88,7 +92,9 @@ public class GUI {
 							int num=Integer.parseInt(casillas[i][j].getText());
 							if(num>0&&num<10){
 								casillas[i][j].setFont(new Font("Tahoma", Font.BOLD,12));
-								casillas[i][j].setEnabled(false);
+								casillas[i][j].setEnabled(true);
+								casillas[i][j].setEditable(false);
+								casillas[i][j].setFocusable(false);
 								tableroInicial.setElemento(i, j, casillas[i][j].getText().charAt(0));
 							}
 						}
@@ -97,7 +103,8 @@ public class GUI {
 							tableroInicial.setElemento(i, j, '0');
 						}
 					}
-				
+			tiempo=new Tiempo(lblTiempo);
+			tiempo.Contar();
 			btnIniciarPartida.setEnabled(false);
 			btnCrearTablero.setEnabled(false);
 			btnCargarTablero.setEnabled(false);
@@ -127,32 +134,60 @@ public class GUI {
 					      if ( ((c < '1') || (c > '9')) && (c != KeyEvent.VK_BACK_SPACE)) {
 					         e.consume();  // ignore event
 					      }
-					      int x=0;
-					      int y=0;
-					      boolean encontre=false;
-					      for(int i=0;i<9&&!encontre;i++)
-								for(int j=0;j<9&&!encontre;j++){
-									encontre=casillas[i][j].equals(e.getSource());
-									x=i;
-									y=j;
-								}
-						  String tablero = armarTablero();
-						  
-						  x++; y++;
-						  String jugada;
-						  if(c==KeyEvent.VK_BACK_SPACE){
-					    	  c='0';
-					    	  jugada="borrarJugada("+c+","+x+","+y+","+tablero+",X)";
-						  }
-						  else
-							  jugada="agregar("+c+","+x+","+y+","+tablero+",X)";
-						  Query q2=new Query(jugada);
-						  boolean exito=q2.hasSolution();
-						  if (!exito){
-							  
-							  JOptionPane.showMessageDialog(null, "Numero incorrecto.");
-							  e.consume();
-						  }
+					      else{
+						      int x=0;
+						      int y=0;
+						      boolean encontre=false;
+						      for(int i=0;i<9&&!encontre;i++)
+									for(int j=0;j<9&&!encontre;j++){
+										encontre=casillas[i][j].equals(e.getSource());
+										x=i;
+										y=j;
+									}
+							  String tablero = armarTablero();
+							  x++; y++;
+							  String jugada;
+							  if(c==KeyEvent.VK_BACK_SPACE){
+						    	  c='0';
+						    	  jugada="borrarJugada("+c+","+x+","+y+","+tablero+",X)";
+							  }
+							  else
+								  jugada="agregar("+c+","+x+","+y+","+tablero+",X)";
+							  Query q2=new Query(jugada);
+							  boolean exito=q2.hasSolution();
+							  if (!exito){  
+								  JOptionPane.showMessageDialog(null, "Numero incorrecto.");
+								  e.consume();
+							  }
+							  else{
+								  if(tableroInicial!=null){
+									  Term nuevoTablero = q2.oneSolution().get("X");
+									  tablero="[";
+									  Term[] t=nuevoTablero.toTermArray();
+									  for(int i=0;i<t.length;i++){
+										  tablero+="[";
+										  Term[] fila=t[i].toTermArray();
+										  for(int j=0;j<fila.length;j++){
+											  tablero+=fila[j].toString();
+												if (j!=8)
+													tablero+=",";
+											}
+											tablero+="]";
+											if (i!=8)
+												tablero+=",";
+									  }
+									  tablero+="]";
+									  Query q3 = new Query("resuelto("+tablero+")");
+									  System.out.println(q3.hasSolution());
+									  if(q3.hasSolution()){
+										  tiempo.Detener();
+										  int segundos=tiempo.getSegundos();
+										  JOptionPane.showMessageDialog(null, "Has resuelto el Sudoku en "+segundos/60+ " minutos y "+segundos%60+" segundos.");
+										  
+									  }
+								  }
+							  }
+					      }
 					   }
 				});
 				
@@ -212,8 +247,10 @@ public class GUI {
 		btnCrearTablero.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				for(int i=0;i<9;i++)
-					for(int j=0;j<9;j++)
+					for(int j=0;j<9;j++){
 						casillas[i][j].setEnabled(true);
+						casillas[i][j].setFocusable(true);
+					}
 				btnIniciarPartida.setEnabled(true);
 				btnCrearTablero.setEnabled(false);
 				btnCargarTablero.setEnabled(false);
@@ -243,23 +280,30 @@ public class GUI {
 		btnResolver.setEnabled(false);
 		btnResolver.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String tablero=armarTablero();
-				Query q=new Query("resolver("+tablero+",X)");
-				boolean exito=q.hasSolution();
-				if (exito){
-					Term nuevoTablero=q.oneSolution().get("X");
-					Term[] t=nuevoTablero.toTermArray();
-					for(int i=0;i<t.length;i++){
-						Term[] fila=t[i].toTermArray();
-						for(int j=0;j<fila.length;j++){
-							String num = fila[j].toString();
-							casillas[i][j].setText(num);
-							casillas[i][j].setEnabled(false);
+				int resp=JOptionPane.showConfirmDialog(null,"Esta seguro que quiere resolver el Sudoku?");
+			      if (JOptionPane.OK_OPTION == resp){
+			    	  String tablero=armarTablero();
+			    	  Query q=new Query("resolver("+tablero+",X)");
+			    	  boolean exito=q.hasSolution();
+			    	  if (exito){
+			    		tiempo.Detener();
+						Term nuevoTablero=q.oneSolution().get("X");
+						Term[] t=nuevoTablero.toTermArray();
+						for(int i=0;i<t.length;i++){
+							Term[] fila=t[i].toTermArray();
+							for(int j=0;j<fila.length;j++){
+								String num = fila[j].toString();
+								casillas[i][j].setText(num);
+								casillas[i][j].setEnabled(false);
+							}
 						}
-					}
-				}
-				else
-					  JOptionPane.showMessageDialog(null, "Vas mal!");
+						JOptionPane.showMessageDialog(null, "Tramposo, segui practicando!");
+						btnResolver.setEnabled(false);
+						btnComprobar.setEnabled(false);
+			    	  }
+			    	  else
+				    	  JOptionPane.showMessageDialog(null, "Vas mal!");
+			      }
 			}
 		});
 		btnResolver.setBounds(175, 305, 117, 23);
@@ -271,8 +315,8 @@ public class GUI {
 				String dificultad = (String) JOptionPane.showInputDialog(null,"Seleccione Una Dificultad",
 						   "Carga de Tablero", JOptionPane.QUESTION_MESSAGE, null,
 						  new String[] { "Seleccione","Facil", "Intermedio", "Dificil" },"Seleccione");
-				tableroInicial = new Mapa(dificultad);
-				if(dificultad!="Seleccione"){
+				if(dificultad!="Seleccione" && dificultad!=null){
+					tableroInicial = new Mapa(dificultad);
 					for(int i=0;i<9;i++)
 						for(int j=0;j<9;j++){
 							String num = ""+tableroInicial.getElemento(i, j);
@@ -281,11 +325,11 @@ public class GUI {
 								casillas[i][j].setEnabled(false);
 							}
 						}
+					btnIniciarPartida.setEnabled(true);
+					btnCrearTablero.setEnabled(false);
+					btnCargarTablero.setEnabled(false);
+					btnComprobar.setEnabled(true);
 				}
-				btnIniciarPartida.setEnabled(true);
-				btnCrearTablero.setEnabled(false);
-				btnCargarTablero.setEnabled(false);
-				btnComprobar.setEnabled(true);
 			}
 		});
 		btnCargarTablero.setBounds(353, 143, 117, 23);
@@ -295,19 +339,26 @@ public class GUI {
 		btnReiniciarTablero.setEnabled(false);
 		btnReiniciarTablero.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				for(int i=0;i<9;i++)
-					for(int j=0;j<9;j++){
+				int resp=JOptionPane.showConfirmDialog(null,"Esta seguro que quiere reiniciar el tablero?");
+			    if (JOptionPane.OK_OPTION == resp){
+			    	for(int i=0;i<9;i++)
+			    		for(int j=0;j<9;j++){
 						String num = ""+tableroInicial.getElemento(i, j);
+						casillas[i][j].setEnabled(true);
 						if(!num.equals("0")){
 							casillas[i][j].setText(num);
-							casillas[i][j].setEnabled(false);
+							casillas[i][j].setEditable(false);
+							casillas[i][j].setFocusable(false);
 						}
-						else
+						else{
 							casillas[i][j].setText("");
+							casillas[i][j].setEditable(true);
+						}
 					}
+			    }
 			}
 		});
-		btnReiniciarTablero.setBounds(350, 205, 130, 29);
+		btnReiniciarTablero.setBounds(346, 205, 130, 29);
 		frame.getContentPane().add(btnReiniciarTablero);
 		
 		btnNuevaPartida = new JButton("Nueva Partida");
@@ -318,7 +369,10 @@ public class GUI {
 					for(int j=0;j<9;j++){
 						casillas[i][j].setText("");
 						casillas[i][j].setEnabled(false);
+						casillas[i][j].setEditable(true);
 					}
+				lblTiempo.setText("Tiempo: 00:00");
+				tiempo.Detener();
 				btnIniciarPartida.setEnabled(false);
 				btnCrearTablero.setEnabled(true);
 				btnCargarTablero.setEnabled(true);
@@ -328,8 +382,13 @@ public class GUI {
 				btnReiniciarTablero.setEnabled(false);
 			}
 		});
-		btnNuevaPartida.setBounds(351, 273, 117, 29);
+		
+		btnNuevaPartida.setBounds(353,273,117,29);
 		frame.getContentPane().add(btnNuevaPartida);
+		lblTiempo = new JLabel("Tiempo: 00:00");
+		lblTiempo.setBounds(185, 341, 107, 16);
+		frame.getContentPane().add(lblTiempo);
+		
 		
 	}
 	
