@@ -24,7 +24,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.Arrays;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 
@@ -68,7 +67,7 @@ public class GUI {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 530, 385);
+		frame.setBounds(100, 100, 550, 420);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		Query q=new Query("consult('logica.pl')");
@@ -91,15 +90,17 @@ public class GUI {
 						if(!casillas[i][j].getText().equals("")){
 							int num=Integer.parseInt(casillas[i][j].getText());
 							if(num>0&&num<10){
-								casillas[i][j].setFont(new Font("Tahoma", Font.BOLD,12));
-								casillas[i][j].setEnabled(true);
+								casillas[i][j].setFont(new Font("Tahoma", Font.BOLD,13));
+								casillas[i][j].setBackground(Color.WHITE);
+								casillas[i][j].setForeground(new Color(180,0,0));
 								casillas[i][j].setEditable(false);
 								casillas[i][j].setFocusable(false);
 								tableroInicial.setElemento(i, j, casillas[i][j].getText().charAt(0));
 							}
 						}
 						else{
-							casillas[i][j].setEnabled(true);
+							casillas[i][j].setEditable(true);
+							casillas[i][j].setFocusable(true);
 							tableroInicial.setElemento(i, j, '0');
 						}
 					}
@@ -127,7 +128,7 @@ public class GUI {
 			for(int j=0;j<9;j++){
 				casillas[i][j]=new JTextField();
 				casillas[i][j].setDocument(new JTextFieldLimit(1));
-				casillas[i][j].setFocusable(true);
+				casillas[i][j].setBackground(Color.WHITE);
 				casillas[i][j].addKeyListener(new KeyAdapter() {
 					   public void keyTyped(KeyEvent e) {
 					      char c = e.getKeyChar();
@@ -190,8 +191,8 @@ public class GUI {
 					      }
 					   }
 				});
-				
-				casillas[i][j].setEnabled(false);
+				casillas[i][j].setFocusable(false);
+				casillas[i][j].setEditable(false);
 				casillas[i][j].setBorder(new LineBorder(new Color(0, 0, 0), 1));
 				casillas[i][j].setHorizontalAlignment(SwingConstants.CENTER);
 				casillas[i][j].addFocusListener(new FocusListener() {
@@ -240,7 +241,7 @@ public class GUI {
 				cuadros[(i / 3)*3 + (j / 3)].add(casillas[i][j]);
 			}
 		
-		btnIniciarPartida.setBounds(355, 19, 113, 23);
+		btnIniciarPartida.setBounds(355, 22, 135, 25);
 		frame.getContentPane().add(btnIniciarPartida);
 		
 		btnCrearTablero = new JButton("Crear Tablero");
@@ -248,7 +249,7 @@ public class GUI {
 			public void actionPerformed(ActionEvent arg0) {
 				for(int i=0;i<9;i++)
 					for(int j=0;j<9;j++){
-						casillas[i][j].setEnabled(true);
+						casillas[i][j].setEditable(true);
 						casillas[i][j].setFocusable(true);
 					}
 				btnIniciarPartida.setEnabled(true);
@@ -257,7 +258,7 @@ public class GUI {
 				btnComprobar.setEnabled(true);
 			}
 		});
-		btnCrearTablero.setBounds(355, 81, 113, 23);
+		btnCrearTablero.setBounds(355, 89, 135, 25);
 		frame.getContentPane().add(btnCrearTablero);
 		
 		btnComprobar = new JButton("Comprobar");
@@ -273,7 +274,7 @@ public class GUI {
 					  JOptionPane.showMessageDialog(null, "Vas mal!");
 			}
 		});
-		btnComprobar.setBounds(22, 305, 117, 23);
+		btnComprobar.setBounds(22, 305, 125, 25);
 		frame.getContentPane().add(btnComprobar);
 		
 		btnResolver = new JButton("Resolver");
@@ -294,7 +295,8 @@ public class GUI {
 							for(int j=0;j<fila.length;j++){
 								String num = fila[j].toString();
 								casillas[i][j].setText(num);
-								casillas[i][j].setEnabled(false);
+								casillas[i][j].setEditable(false);
+								casillas[i][j].setFocusable(false);
 							}
 						}
 						JOptionPane.showMessageDialog(null, "Tramposo, segui practicando!");
@@ -306,7 +308,7 @@ public class GUI {
 			      }
 			}
 		});
-		btnResolver.setBounds(175, 305, 117, 23);
+		btnResolver.setBounds(167, 305, 125, 25);
 		frame.getContentPane().add(btnResolver);
 		
 		btnCargarTablero = new JButton("Cargar Tablero");
@@ -322,7 +324,8 @@ public class GUI {
 							String num = ""+tableroInicial.getElemento(i, j);
 							if(!num.equals("0")){
 								casillas[i][j].setText(num);
-								casillas[i][j].setEnabled(false);
+								casillas[i][j].setEditable(false);
+								casillas[i][j].setFocusable(false);
 							}
 						}
 					btnIniciarPartida.setEnabled(true);
@@ -332,7 +335,7 @@ public class GUI {
 				}
 			}
 		});
-		btnCargarTablero.setBounds(353, 143, 117, 23);
+		btnCargarTablero.setBounds(355, 156, 135, 25);
 		frame.getContentPane().add(btnCargarTablero);
 		
 		btnReiniciarTablero = new JButton("Reiniciar Tablero");
@@ -344,7 +347,6 @@ public class GUI {
 			    	for(int i=0;i<9;i++)
 			    		for(int j=0;j<9;j++){
 						String num = ""+tableroInicial.getElemento(i, j);
-						casillas[i][j].setEnabled(true);
 						if(!num.equals("0")){
 							casillas[i][j].setText(num);
 							casillas[i][j].setEditable(false);
@@ -353,12 +355,18 @@ public class GUI {
 						else{
 							casillas[i][j].setText("");
 							casillas[i][j].setEditable(true);
+							casillas[i][j].setFocusable(true);
 						}
 					}
+			    	tiempo.Detener();
+			    	tiempo=new Tiempo(lblTiempo);
+					tiempo.Contar();
 			    }
+			    btnResolver.setEnabled(true);
+			    btnComprobar.setEnabled(true);
 			}
 		});
-		btnReiniciarTablero.setBounds(346, 205, 130, 29);
+		btnReiniciarTablero.setBounds(355, 223, 135, 25);
 		frame.getContentPane().add(btnReiniciarTablero);
 		
 		btnNuevaPartida = new JButton("Nueva Partida");
@@ -368,8 +376,11 @@ public class GUI {
 				for(int i=0;i<9;i++)
 					for(int j=0;j<9;j++){
 						casillas[i][j].setText("");
-						casillas[i][j].setEnabled(false);
-						casillas[i][j].setEditable(true);
+						casillas[i][j].setEditable(false);
+						casillas[i][j].setFocusable(false);
+						casillas[i][j].setForeground(null);
+						casillas[i][j].setBackground(Color.WHITE);
+						casillas[i][j].setFont(null);
 					}
 				lblTiempo.setText("Tiempo: 00:00");
 				tiempo.Detener();
@@ -383,7 +394,7 @@ public class GUI {
 			}
 		});
 		
-		btnNuevaPartida.setBounds(353,273,117,29);
+		btnNuevaPartida.setBounds(355,290,135,25);
 		frame.getContentPane().add(btnNuevaPartida);
 		lblTiempo = new JLabel("Tiempo: 00:00");
 		lblTiempo.setBounds(185, 341, 107, 16);

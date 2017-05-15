@@ -67,39 +67,26 @@ reemplazar(Nuevo,N,[X|L],[X|LNueva]):- Aux is N-1, reemplazar(Nuevo,Aux,L,LNueva
 
 comprobar(Tablero):-resolver(Tablero,_).
 
-resolver(TableroF,TableroOut):-tableroProlog(TableroF,TableroC,_),
-    			agregarNumero(TableroF,TableroNuevo,TableroC),
-    			tableroProlog(TableroNuevo,_,Cuadros),
-    			todos_diferentes_matriz(Cuadros),
+resolver(TableroF,TableroOut):-tableroProlog(TableroF,TableroC,TableroR),
+    			agregarNumero(TableroF,TableroNuevo,TableroC,TableroR,1),
 				resolver(TableroNuevo,TableroOut).
 
-resolver(TableroF,TableroOut):-resuelto(TableroF),copiarSalida(TableroF,TableroOut).
+resolver(TableroF,TableroF):-resuelto(TableroF).
 
 resuelto(TableroF):-tableroProlog(TableroF,Columnas,Cuadros),final(TableroF),final(Columnas),final(Cuadros).
 
-copiarSalida([],[]).
-copiarSalida([X|Xs],[X|Ys]):-copiarSalida(Xs,Ys).
+agregarNumero([Fila|Tablero],[Nueva|Tablero],TableroC,TableroR,NroF):-buscarCero(Fila,Nueva,Fila,TableroC,TableroR,NroF,1).
+agregarNumero([Fila|Tablero],[Fila|T],TableroC,TableroR,NroF):-no_pertenece(0,Fila), Naux is NroF+1,
+    							agregarNumero(Tablero,T,TableroC,TableroR,Naux).
 
-agregarNumero([Fila|Tablero],[Nueva|Tablero],TableroC):-buscarCero(Fila,Nueva,Fila,TableroC).
-agregarNumero([Fila|Tablero],[Fila|T],TableroC):-no_pertenece(0,Fila),
-    							agregarNumero(Tablero,T,TableroC).
-
-buscarCero([0|Xs],[N|Xs],Fila,[Col|_]):-nroValido(N),no_pertenece(N,Fila),no_pertenece(N,Col).
-buscarCero([X|Xs],[X|Nueva],Fila,[_|TableroC]):-X\=0,buscarCero(Xs,Nueva,Fila,TableroC).
-
-todos_diferentes_matriz([]).
-todos_diferentes_matriz([Lista|Resto]):-todos_diferentes(Lista),
-    				todos_diferentes_matriz(Resto).
-
-todos_diferentes([]).
-todos_diferentes([_,[]]).
-todos_diferentes([X|L]):-X\=0,no_pertenece(X,L),todos_diferentes(L).
-todos_diferentes([X|L]):-X=0,todos_diferentes(L).
+buscarCero([0|Xs],[N|Xs],Fila,[Col|_],TableroR,NroF,Nroc):-nroValido(N),no_pertenece(N,Fila),no_pertenece(N,Col),Z is (((NroF-1) div 3)*3 + ((Nroc-1) div 3))+1,
+    			obtenerElemento(Z,TableroR,L),no_pertenece(N,L).
+buscarCero([X|Xs],[X|Nueva],Fila,[_|TableroC],TableroR,NroF,Nroc):-X\=0,Naux is Nroc+1,buscarCero(Xs,Nueva,Fila,TableroC,TableroR,NroF,Naux).
 
 final([]).
-final([Lista|Resto]):-todos_diferentes_2(Lista),
+final([Lista|Resto]):-todos_diferentes(Lista),
     				final(Resto).
 
-todos_diferentes_2([]).
-todos_diferentes_2([X,[]]):-X\=0.
-todos_diferentes_2([X|L]):-X\=0,no_pertenece(X,L),todos_diferentes_2(L).
+todos_diferentes([]).
+todos_diferentes([X,[]]):-X\=0.
+todos_diferentes([X|L]):-X\=0,no_pertenece(X,L),todos_diferentes_2(L).
