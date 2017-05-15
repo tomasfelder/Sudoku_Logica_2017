@@ -190,8 +190,12 @@ final([Lista|Resto]):-todos_diferentes(Lista),
 %Casos base
 todos_diferentes([]).
 todos_diferentes([X,[]]):-X\=0.
+<<<<<<< HEAD
 
 %Caso recursivo
 todos_diferentes([X|L]):-X\=0,no_pertenece(X,L),todos_diferentes(L).
 
 % ---------------------------------------------------------------------------------------------------
+=======
+todos_diferentes([X|L]):-X\=0,no_pertenece(X,L),todos_diferentes(L).
+>>>>>>> branch 'master' of https://github.com/tomasfelder/Sudoku_Logica_2017.git
